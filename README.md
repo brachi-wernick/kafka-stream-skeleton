@@ -149,12 +149,12 @@ To make sure all is work, run `docker ps` you may see 4 images:
     
 4. to produce data to input topic:
 
- 4.1 uncomment in docker compose the image you want work with (datagen or producer)
- 
- 4.2 run the image `docker compose docker-compose up -d --build datagen` or `docker-compose up -d --build kafka-producer`
- 
- 4.3 when you feel like you have enough data, better to stop this image:
-    run  `docker compose docker stop datagen` or `docker stop kafka-producer`
+     4.1 uncomment in docker compose the image you want work with (datagen or producer)
+     
+     4.2 run the image `docker compose docker-compose up -d --build datagen` or `docker-compose up -d --build kafka-producer`
+     
+     4.3 when you feel like you have enough data, better to stop this image:
+        run  `docker compose docker stop datagen` or `docker stop kafka-producer`
 
 5. check if consumer can show stream output successfully:
   run `docker logs kafka-consumer -f`
