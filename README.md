@@ -134,7 +134,7 @@ also here, you can use some kafka sink connect, to send result to some external 
 If you want make changes on this repository, don't forget to fork this before cloning.
 
 1. run mvn clean install
-2. add .env file contains your IP, for example:
+2. **MUST** add .env file contains **your IP**, for example:
 ```properties
 LOCALHOST_IP=192.168.2.100
 ```
