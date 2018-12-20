@@ -1,5 +1,4 @@
 # kafka-stream-skeleton
-
 <p>Kafka stream started project</p>
 <ul>
   <li><a href="#Overview">Overview</a></li>
@@ -23,8 +22,6 @@ In order, to fill the stream input topic with data, you can use data generation 
 Confluent has great [tool](https://docs.confluent.io/current/ksql/docs/tutorials/generate-custom-test-data.html) to generate data by avro schema.
 
 check also [GitHub page](https://github.com/confluentinc/ksql/tree/master/ksql-examples)
-
-This tool is used by default to fill stream input topic with data.
 
 schema must be located in <root_directory>/schema.
 
@@ -69,7 +66,7 @@ If using this option, you need to uncomment producer image in the docker-compose
 
 3. you can also run some kafka connect tool to some external source.
  
-There is no example here. need to add your own image for it.
+There is no example here. need to add your own docker image for it, or run it locally
 
 ## Stream processing
 
@@ -128,6 +125,7 @@ also here, you can use some kafka sink connect, to send result to some external 
 1. docker
 2. git
 3. maven
+4. jdk8 
 
 ### install 
 
@@ -138,22 +136,37 @@ If you want make changes on this repository, don't forget to fork this before cl
 ```properties
 LOCALHOST_IP=192.168.2.100
 ```
+NOTE: if you change networks, you may change this IP.
+
 3. `docker-compose up -d --build`
 
-To make sure all is work, run `docke ps` you may see 5 images:
+To make sure all is work, run `docker ps` you may see 4 images:
 
     1. kafka
     2. zookeeper
-    3. datagen (or kafka-producer)
-    4. kafka-stream
-    5. kafka-consumer
+    3. kafka-stream
+    4. kafka-consumer
+    
+4. to produce data to input topic:
+ 4.1 uncomment in docker compose the image you want work with (datagen or producer)
+ 4.2 run the image `docker compose docker-compose up -d --build datagen` or `docker-compose up -d --build kafka-producer`
+ 4.3 when you feel like you have enough data, better to stop this image:
+    run  `docker compose docker stop datagen` or `docker stop kafka-producer`
 
-4. `docker-compose stop `
+5. check if consumer can show stream output successfully:
+  run `docker logs kafka-consumer -f`
+  you need to see similar output in the logs:
 
-to stop all images
-
+```
+MESSAGE=> key:user_4, value:LoginCount{userName='user_4', count=1, windowStart=1545346143000, windowEnd=1545346144000}
+MESSAGE=> key:user_2, value:LoginCount{userName='user_2', count=1, windowStart=1545346144000, windowEnd=1545346145000}
+MESSAGE=> key:user_3, value:LoginCount{userName='user_3', count=1, windowStart=1545346144000, windowEnd=1545346145000}
+MESSAGE=> key:user_4, value:LoginCount{userName='user_4', count=1, windowStart=1545346145000, windowEnd=1545346146000}
+```  
 
 ### Run Stream from IDE
+
+Before starting, make sure you stop kafka stream docker image: `docker stop kafka-stream`
 
 You have to go kafka-stream module, and run Application.class.
 
@@ -179,4 +192,3 @@ KAFKA_URL="0.0.0.0:9092"
 
 
 ![see example](env-variable-intelij.png)
-

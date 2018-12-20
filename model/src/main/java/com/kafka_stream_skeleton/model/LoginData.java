@@ -5,15 +5,17 @@ public class LoginData {
     String userPassword;
     String ip;
     Long  date;
+    String dateAsString;
 
     public LoginData() {
     }
 
-    public LoginData(String userName, String userPassword, String ip, Long date) {
+    public LoginData(String userName, String userPassword, String ip, Long date, String dateAsString) {
         this.userName = userName;
         this.userPassword = userPassword;
         this.ip = ip;
         this.date = date;
+        this.dateAsString=dateAsString;
     }
 
     @Override
@@ -56,5 +58,13 @@ public class LoginData {
 
     public void setDate(Long date) {
         this.date = date;
+    }
+
+    public String getDateAsString() {
+        return dateAsString;
+    }
+
+    public void setDateAsString(String dateAsString) {
+        this.dateAsString = dateAsString;
     }
 }
