@@ -45,33 +45,30 @@ services:
     ports:
     - "9090:9090"
 
-  # producer:
-  #  build: producer
-  #  environment:
-  #    KAFKA_URL: kafka:9092
-  #    INPUT_TOPIC: "users-login"
-  #  restart: always
-  #  container_name: kafka-producer
-  #  ports:
-  #  - "9088:9088"
+#  producer:
+#    build: producer
+#    environment:
+#      KAFKA_URL: kafka:9092
+#      INPUT_TOPIC: "users-login"
+#    restart: always
+#    container_name: kafka-producer
+#    ports:
+#    - "9088:9088"
 
 
-  # datagen:
-  #  image: confluentinc/ksql-examples:latest
-  #  container_name: datagen
-  #  depends_on:
-  #  - zookeeper
-  #  - kafka
-  #  volumes:
-  #  - ./schema:/schema
-  #  command: "bash -c 'ksql-datagen \
-  #                    schema=./schema/model.avro \
-  #                    key=userName \
-  #                        format=json \
-  #                        topic=users-login \
-  #                        maxInterval=1000 \
-  #                        bootstrap-server=kafka:9092 \
-  #                        propertiesFile=./schema/datagen.properties'"
-
-volumes:
-  schema:
+#  datagen:
+#    image: confluentinc/ksql-examples:latest
+#    container_name: datagen
+#    depends_on:
+#    - zookeeper
+#    - kafka
+#    volumes:
+#    - ./schema:/schema
+#    command: "bash -c 'ksql-datagen \
+#                      schema=./schema/model.avro \
+#                      key=userName \
+#                          format=json \
+#                          topic=users-login \
+#                          maxInterval=1000 \
+#                          bootstrap-server=kafka:9092 \
+#                          propertiesFile=./schema/datagen.properties'"

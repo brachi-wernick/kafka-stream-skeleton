@@ -194,3 +194,42 @@ KAFKA_URL="0.0.0.0:9092"
 
 
 ![see example](env-variable-intelij.png)
+
+### Project Planning Guidelines
+For a fast prototyping with Kafka Streams consider the following guidelines.  
+
+#### Model Building
+Fast and efficient data modeling accelerates the prototyping and allow easier experimenting with kafka streams. The following guidelines will ease the modeling phase:
+
+* Identify the input data. Does it come from a single source (one topic) or multiple (several topics)?
+* Should your data be considered as a stream of events? If so, read it using KStream.
+* In case of key-value input, use KTable to read the data. In such case, it is better to insert the data using the designated key, rather than generating the key on the fly using transformation.
+* For each input topic, build a Java model with the expected properties.
+* Decide how the data is serialized in the topics. This can be text-based such as delimited values or JSON, or binary based such as protobuf or java object serialization. It is suggested to use text-based for fast prototyping.
+* Implement Serdes (Serializers and Deserializing) for each input, according to the decision made in the previos item.
+* Build a schema for data generation. You can see data generation example in this project.
+
+#### Transformation
+If your data needs transformation, you might need to build models and serdes for the transformed data. 
+This might be required for intermediate topics or final output. If such need arise during implementation, 
+take into consideration the time to build them.
+
+#### Aggregation
+Aggregations are done by keys. If your application required to aggregate data, designate the key and consider 
+inserting the data using this key, rather than using on the fly key extraction using transformations.
+
+In addition, grouping by key requires an intermediate persistence. In addition to designating the serializers required 
+for this persistence, try to create the simplest value before the grouping, making the intermediate persistence 
+smaller and faster.
+
+#### Join
+Join is done between two topics, either read using ***KStream*** or ***KTable***. The input topics must be co-partitioned. 
+This means in our case, the same number of partitions. Make sure those input topics are co-partitioned.
+
+In addition, joins also requires intermediate persistence. Do designate the serializers required for this persistence 
+as well and select the left and right values wisely - simple and small as possible.
+
+#### Output
+In most cases, the better way to output data in Kafka Stream is to write to topic. The output information is 
+usually needed in sub-systems such as elasticsearch, SQL DB etc. Consider using kafka connect or a simple 
+consumer application to copy the data into the sub-system.
