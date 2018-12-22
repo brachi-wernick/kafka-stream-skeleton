@@ -1,5 +1,5 @@
 # kafka-stream-skeleton
-<p>Kafka stream started project</p>
+<p>Kafka stream starter project</p>
 <ul>
   <li><a href="#Overview">Overview</a></li>
   <li><a href="#Mock-data">Mock data</a></li>
@@ -11,8 +11,8 @@
 ## Overview
 
 This skeleton contains stream processor and consumer that just print out the stream output.
-There is a module contains the data model used for the stream.
-In order, to fill the stream input topic with data, you can use data generation tool, or build the producer image.
+There is a module contains the data model used by the streaming application.
+In order to fill the stream input topic with data, you can use data generation tool, or build the producer image.
 
 ![Full flow](kafka-skeleton.png)
 
@@ -21,13 +21,13 @@ In order, to fill the stream input topic with data, you can use data generation 
 1. By data generation
 Confluent has great [tool](https://docs.confluent.io/current/ksql/docs/tutorials/generate-custom-test-data.html) to generate data by avro schema.
 
-check also [GitHub page](https://github.com/confluentinc/ksql/tree/master/ksql-examples)
+Check also [GitHub page](https://github.com/confluentinc/ksql/tree/master/ksql-examples)
 
-schema must be located in <root_directory>/schema.
+The schema must be located in <root_directory>/schema.
 
-current schema is model.avro that has same types as the model used for stream processing.
+The current schema is model.avro that has same types as the model used for stream processing.
 
-schema is used in docker-compose file, in image `datagen`
+The schema is used in docker-compose file, in image `datagen`
 
 ```yaml
   datagen:
@@ -45,11 +45,11 @@ schema is used in docker-compose file, in image `datagen`
                           propertiesFile=./schema/datagen.properties'"
 ```
 
-if you will want to change the schema name, just change the value of the attribute in schema, in the bash command.
+If you wish to change the schema name, just change the value of the `schema` attribute, in the bash command section.
 
-you may need also to change the key attribute, with the key in your new model.
+You may need also to change the key attribute and set it to one of the columns in your new schema.
 
-schema can be very strong tool, check more examples [here](https://github.com/confluentinc/ksql/tree/master/ksql-examples)  
+The avro schema can be a very powerful tool, check more examples [here](https://github.com/confluentinc/ksql/tree/master/ksql-examples/src/main/resources)  
  
 2. By custom producer
 
@@ -72,8 +72,8 @@ There is no example here. need to add your own docker image for it, or run it lo
 
 First, I recommend to check [confluent stream code example](https://github.com/confluentinc/kafka-streams-examples/tree/5.0.1-post/src/main/java/io/confluent/examples/streams).
 
-Here in this project, Stream processing is done in the stream module, Application class, stream read the input topic data, and does some grouping and aggregation.
-stream must define SerDes (Serialization and Deserialization) for key and value, this also need to be defined if grouping/counting/aggregation methods change the key/value type.
+Here in this project, Stream processing is done in the stream module's Application class. The stream reads the input topic data, and does some grouping and aggregation.
+The stream must define SerDes (Serialization and Deserialization) for the key  and value. SerDes also need to be defined if grouping/counting/aggregation methods change the key/value type.
 
 ```java
 Serde<LoginData> loginDataSerde = SerdeBuilder.buildSerde(LoginData.class);
@@ -83,7 +83,7 @@ final KStream<String, LoginData> source = builder.stream(INPUT_TOPIC,
 
 ```
 
-and because the counting method change the types, I must specify this:
+and because the counting method change the types, SerDes must be specified in the `to` command:
 ```java
 
 final Serde<String> stringSerde = Serdes.String();
@@ -94,13 +94,13 @@ counts.toStream().map((windowed,count)->new KeyValue<>(windowed.key(),new LoginC
                 .to(OUTPUT_TOPIC, Produced.with(stringSerde, loginCountSerde));
 ```
 
-Also here, there are default SerDes for primitive types, and for json need to write our own SerDes.
-use the class`com.kafka_stream_skeleton.serialization.SerdeBuilder`, to create a custom SerDes.
+There are default SerDes for primitive types provided by Kafka Streams API. For JSON, one needs to write her own SerDes.
+You can use the class`com.kafka_stream_skeleton.serialization.SerdeBuilder`, to create a JSON SerDes based on your model.
 
 ## Consuming stream data
 
-Stream output data is written in its own topic and need to be consumed, I write some consumer, that just print result to the console.
-also here, need to specify correctly the serializers, according to the stream results
+Stream output data is written to an output topic. If you wish to consume and display the topic's content, there is a consumer example in this project, that just print result to the console.
+Also here, one needs to specify correctly the deserializers, according to the stream results:
 
 ```java
 props.put("key.deserializer", StringDeserializer.class.getName());
@@ -116,7 +116,7 @@ to see output:
 docker logs kafka-consumer -f
 ```
 
-also here, you can use some kafka sink connect, to send result to some external system, DB, elasticsearch
+You can use Kafka Connect to send the results to an external system, such as SQL DB or elasticsearch.
 
 ## Installation
 
@@ -129,36 +129,35 @@ also here, you can use some kafka sink connect, to send result to some external 
 
 ### install 
 
-If you want make changes on this repository, don't forget to fork this before cloning.
+If you wish to make changes to this repository, don't forget to fork this before cloning.
 
-1. run mvn clean install
-2. **MUST** add .env file contains **your IP**, for example:
+1. Run `mvn clean install`
+2. You **MUST** add .env file contains **your IP**, for example:
 ```properties
 LOCALHOST_IP=192.168.2.100
 ```
-NOTE: if you change networks, you may change this IP.
+NOTE: if you change network, you may change this value according to your current IP.
 
 3. `docker-compose up -d --build`
 
-To make sure all is work, run `docker ps` you may see 4 images:
+To make sure everything works well, run `docker ps`. You should see 4 containers running:
 
     1. kafka
     2. zookeeper
     3. kafka-stream
     4. kafka-consumer
     
-4. to produce data to input topic:
+4. To produce data into the input topic:
 
-     4.1 uncomment in docker compose the image you want work with (datagen or producer)
+     4.1 Uncomment in `docker-compose.yml` file the service you want work with (datagen or producer)
      
-     4.2 run the image `docker compose docker-compose up -d --build datagen` or `docker-compose up -d --build kafka-producer`
+     4.2 Run the container using `docker-compose up -d --build datagen` or `docker-compose up -d --build kafka-producer`
      
-     4.3 when you feel like you have enough data, better to stop this image:
-        run  `docker compose docker stop datagen` or `docker stop kafka-producer`
+     4.3 If you wish to stop producing data, you can stop the containers using `docker-compose stop datagen` or `docker-compose stop producer`
 
-5. check if consumer can show stream output successfully:
-  run `docker logs kafka-consumer -f`
-  you need to see similar output in the logs:
+5. Check if the consumer shows the stream output successfully:
+  run `docker logs kafka-consumer -f` or `docker-compose logs -f consumer`.
+  You should see output similar to this:
 
 ```
 MESSAGE=> key:user_4, value:LoginCount{userName='user_4', count=1, windowStart=1545346143000, windowEnd=1545346144000}
@@ -169,19 +168,19 @@ MESSAGE=> key:user_4, value:LoginCount{userName='user_4', count=1, windowStart=1
 
 ### Run Stream from IDE
 
-Before starting, make sure you stop kafka stream docker image: `docker stop kafka-stream`
+Before starting, make sure you stop **kafka-stream** docker container: `docker-compose stop stream`
 
-You have to go kafka-stream module, and run Application.class.
+In **kafka-stream** module, run the Application class.
 
-This class expect to get 4 environment variable:
+This class expect 4 environment variable:
 
 1. APPLICATION_ID
 2. INPUT_TOPIC
 3. OUTPUT_TOPIC
 4. KAFKA_URL
 
-docker-compose send values for this properties, when running the application from IDE we need to set values for this environment variables.
-(intelij, open run configuration, and set this variable with the values in Environment Variable field)
+docker-compose sets these values when running the container using docker. However, when running the application from IDE we need to set the values of those environment variables.
+(For intelij, open run configuration, and set these variables in **Environment Variables** field)
 
 By default, (unless you change topic names and ports), set this values
 
