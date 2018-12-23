@@ -173,16 +173,16 @@ Here, you can run Kafka tools from CLI, for example creating a topic
 
 `$KAFKA_HOME/bin/kafka-topics.sh --create --topic my-topic  --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1`
 
-Tow important things to look into in the above command:
+Tow primary things to look in the above command:
 - I use `$KAFKA_HOME` to access Kafka bin tools 
-- Calling to zookeeper by image name and not localhost: `zookeeper:2181` 
+- Calling zookeeper with image name and not with localhost: `zookeeper:2181` 
 
-  because I'm inside Kafka image, and using localhost here, will refer to the Kafka image host, and not to the PC IP. 
+  because I'm inside Kafka image, and using localhost here, will refer to the Kafka image host, and not to the local machine. 
 
 7. Reset tool.
-To reset stream application offset and auto-created topics run from Kafka image bash (if you aren't in the bash yet, first run `docker exec -i -t Kafka /bin/bash` )
+To reset stream application run in bash (if you aren't in the bash yet, first run `docker exec -i -t Kafka /bin/bash` )
 
-make sure you set the correct application-is and topics.
+make sure you set the correct application-id and topic name.
 
 `$KAFKA_HOME/bin/kafka-streams-application-reset.sh --application-id users-counts-app1 --input-topics user-login`
 
