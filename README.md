@@ -6,6 +6,7 @@
   <li><a href="#Stream-processing">Stream processing</a></li>
   <li><a href="#Consuming-stream-data">Consuming stream data</a></li>
   <li><a href="#Installation">Installation</a></li>
+  <li><a href="#project-planning-guidelines">Project Planning Guidelines</a></li>
 </ul>
 
 ## Overview
@@ -156,7 +157,7 @@ To make sure everything works well, run `docker ps`. You should see 4 containers
      4.3 If you wish to stop producing data, you can stop the containers using `docker-compose stop datagen` or `docker-compose stop producer`
 
 5. Check if the consumer shows the stream output successfully:
-  run `docker logs kafka-consumer -f` or `docker-compose logs -f consumer`.
+  run `docker-compose logs kafka-consumer -f` or `docker-compose logs -f consumer`.
   You should see output similar to this:
 
 ```
@@ -165,6 +166,35 @@ MESSAGE=> key:user_2, value:LoginCount{userName='user_2', count=1, windowStart=1
 MESSAGE=> key:user_3, value:LoginCount{userName='user_3', count=1, windowStart=1545346144000, windowEnd=1545346145000}
 MESSAGE=> key:user_4, value:LoginCount{userName='user_4', count=1, windowStart=1545346145000, windowEnd=1545346146000}
 ```  
+
+6. To open kafka bash run `docker exec -i -t kafka /bin/bash`
+
+Here, you can run Kafka tools from CLI, for example creating a topic
+
+`$KAFKA_HOME/bin/kafka-topics.sh --create --topic my-topic  --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1`
+
+Tow important things to look into in the above command:
+- I use `$KAFKA_HOME` to access Kafka bin tools 
+- Calling to zookeeper by image name and not localhost: `zookeeper:2181` 
+
+  because I'm inside Kafka image, and using localhost here, will refer to the Kafka image host, and not to the PC IP. 
+
+7. Reset tool.
+To reset stream application offset and auto-created topics run from Kafka image bash (if you aren't in the bash yet, first run `docker exec -i -t Kafka /bin/bash` )
+
+make sure you set the correct application-is and topics.
+
+`$KAFKA_HOME/bin/kafka-streams-application-reset.sh --application-id users-counts-app1 --input-topics user-login`
+
+you should see a similar output to this:
+```
+Reset-offsets for input topics [user-login]
+Following input topics are not found, skipping them
+Topic: user-login
+Deleting all internal/auto-created topics for application users-counts-app1
+Done.
+```
+
 
 ### Run Stream from IDE
 
@@ -233,3 +263,9 @@ as well and select the left and right values wisely - simple and small as possib
 In most cases, the better way to output data in Kafka Stream is to write to topic. The output information is 
 usually needed in sub-systems such as elasticsearch, SQL DB etc. Consider using kafka connect or a simple 
 consumer application to copy the data into the sub-system.
+
+
+
+docker exec -i -t kafka /bin/bash
+$KAFKA_HOME/bin/kafka-topics.sh --create --topic login-input-30  --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1
+kafka-streams-application-reset.sh --application-id users-counts-app1 --input-topics user-login
