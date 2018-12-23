@@ -6,6 +6,7 @@
   <li><a href="#Stream-processing">Stream processing</a></li>
   <li><a href="#Consuming-stream-data">Consuming stream data</a></li>
   <li><a href="#Installation">Installation</a></li>
+  <li><a href="#project-planning-guidelines">Project Planning Guidelines</a></li>
 </ul>
 
 ## Overview
@@ -165,6 +166,31 @@ MESSAGE=> key:user_2, value:LoginCount{userName='user_2', count=1, windowStart=1
 MESSAGE=> key:user_3, value:LoginCount{userName='user_3', count=1, windowStart=1545346144000, windowEnd=1545346145000}
 MESSAGE=> key:user_4, value:LoginCount{userName='user_4', count=1, windowStart=1545346145000, windowEnd=1545346146000}
 ```  
+
+6. To open kafka bash run `docker exec -i -t kafka /bin/bash`
+
+Here, you can run Kafka tools from CLI, for example creating a topic
+
+`kafka-topics.sh --create --topic my-topic  --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1`
+
+Note, that I call zookeeper with image name and not with localhost: `zookeeper:2181`, because I'm inside Kafka image, and using localhost here, will refer to the Kafka image host, and not to the local machine. 
+
+7. Reset tool.
+To reset stream application run in bash (if you aren't in the bash yet, first run `docker exec -i -t kafka /bin/bash` )
+
+make sure you set the correct application-id and topic name.
+
+`kafka-streams-application-reset.sh --application-id users-counts-app1 --input-topics user-login`
+
+you should see a similar output to this:
+```
+Reset-offsets for input topics [user-login]
+Following input topics are not found, skipping them
+Topic: user-login
+Deleting all internal/auto-created topics for application users-counts-app1
+Done.
+```
+
 
 ### Run Stream from IDE
 
