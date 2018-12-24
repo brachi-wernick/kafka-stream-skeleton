@@ -32,7 +32,7 @@ services:
      APPLICATION_ID: "users-counts-app1"
    container_name: kafka-stream
    ports:
-   - "9089:9089"
+   - "9087:9087"
 
   consumer:
     build: consumer
@@ -44,6 +44,8 @@ services:
     container_name: kafka-consumer
     ports:
     - "9090:9090"
+
+## DATA producer/ datagen
 
 #  producer:
 #    build: producer
@@ -72,3 +74,51 @@ services:
 #                          maxInterval=1000 \
 #                          bootstrap-server=kafka:9092 \
 #                          propertiesFile=./schema/datagen.properties'"
+
+## Elastic connect
+#  elasticsearch:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:6.3.2
+#    environment:
+#     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+#    ports:
+#    - "9200:9200"
+#
+#  kibana:
+#      image: docker.elastic.co/kibana/kibana:6.3.2
+#      ports:
+#      - "5601:5601"
+#      environment:
+#       xpack.security.enabled: "false"
+#       discovery.type: "single-node"
+#
+#  elk-connect:
+#   image: confluentinc/cp-kafka-connect:5.0.0
+#   container_name: kafka-elk-connect
+#   depends_on:
+#     - elasticsearch
+#     - kibana
+#     - kafka
+#   ports:
+#   - "8083:8083"
+#   volumes:
+#   - ./connect/target/dependency:/etc/kafka-connect/jars
+#   environment:
+#     CONNECT_BOOTSTRAP_SERVERS: "kafka:9092"
+#     CONNECT_REST_PORT: 8083
+#     CONNECT_GROUP_ID: users-elk-connect
+#     CONNECT_CONFIG_STORAGE_TOPIC: kafka-connect-configs
+#     CONNECT_OFFSET_STORAGE_TOPIC: kafka-connect-offsets
+#     CONNECT_STATUS_STORAGE_TOPIC: kafka-connect-status
+#     CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+#     CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+#     CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+#     CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+#     CONNECT_INTERNAL_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+#     CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+#     CONNECT_REST_ADVERTISED_HOST_NAME: "localhost"
+#     CONNECT_LOG4J_ROOT_LOGLEVEL: "INFO"
+#     CONNECT_PLUGIN_PATH: "/etc/kafka-connect/jars"
+#     CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: "1"
+#     CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "1"
+#     CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "1"
+#     CONNECT_OFFSET_STORAGE_FILE_FILENAME: /tmp/connect.offsets
