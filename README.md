@@ -364,7 +364,7 @@ In case you want use another connector plugin, you have to follow these instruct
     volumes:
       - ./connect/target/dependency:/etc/kafka-connect/jars
     environment:
-      `CONNECT_PLUGIN_PATH: "/etc/kafka-connect/jars"`
+      "CONNECT_PLUGIN_PATH": "/etc/kafka-connect/jars"
     ```
     No need to change the docker-compose file. the connector service is a generic configuration for all connectors.
 3. Run the rest API, as we run for Elasticserach connector, but with the new plugin configuration, you may change `connector.class` and add other plugin specific properties.
