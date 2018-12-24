@@ -354,3 +354,20 @@ you should get a similar result:
     ``` 
 6. Everything is ready, you can go to Kibana: `http://localhost:5601/` and create your own visualization and dashboards.
  
+### Add a different connector plugin
+In case you want use another connector plugin, you have to follow these instructions
+
+1. Replace the dependency in `connect` module with your required connector plugin.
+2. Run `mvn clean install`. it will make a `dependency` folder in `target`, with all the plugin dependency tree. 
+
+    This used in `docker-compose.yml`: 
+    ```yml
+    volumes:
+      - ./connect/target/dependency:/etc/kafka-connect/jars
+    environment:
+      `CONNECT_PLUGIN_PATH: "/etc/kafka-connect/jars"`
+    ```
+    No need to change the docker-compose file. the connector service is a generic configuration for all connectors.
+3. Run the rest API, as we run for Elasticserach connector, but with the new plugin configuration, you may change `connector.class` and add other plugin specific properties.
+
+
