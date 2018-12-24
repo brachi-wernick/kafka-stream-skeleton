@@ -13,6 +13,7 @@
         <module>producer</module>
         <module>kafka-stream</module>
         <module>consumer</module>
+        <module>connect</module>
     </modules>
 
 </project>

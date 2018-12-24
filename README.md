@@ -7,6 +7,7 @@
   <li><a href="#Consuming-stream-data">Consuming stream data</a></li>
   <li><a href="#Installation">Installation</a></li>
   <li><a href="#project-planning-guidelines">Project Planning Guidelines</a></li>
+  <li><a href="#kafka-elasticsearch-connect">Kafka Elasticsearch connect</a></li>
 </ul>
 
 ## Overview
@@ -259,3 +260,97 @@ as well and select the left and right values wisely - simple and small as possib
 In most cases, the better way to output data in Kafka Stream is to write to topic. The output information is 
 usually needed in sub-systems such as elasticsearch, SQL DB etc. Consider using kafka connect or a simple 
 consumer application to copy the data into the sub-system.
+
+### Kafka Elasticsearch connect
+In most cases, you will be required to connect the stream output topic to some external system or DB.
+In this example, I connect topic data to Elasticsearch and then I can show interactive dashboards in Kibana.
+
+In order to activate this ability, open `docker-compose.yml` file and uncomment services: elasticsearch, kibana, and elk-connect.
+
+Then follow these instructions:
+1. Build the `connect` module: `mvn clean install`.
+2. Start the connector service: `docker-compose up -d --build elk-connect`.
+3. Inspect logs to see connector is started successfully: ` docker-compose logs -f --tail=100 elk-connect`
+
+    In this step, we have a fully configured and running confluent connector service.
+    
+    Now, we need to create our own Elasticsearch connector with the stream output topic.
+    
+    Run the bellow rest api ( use rest tool or curl):
+    
+    URL: http://localhost:8083/connectors
+    METHOD: POST
+    BODY:
+    ```json
+    { "name" : "elk-connect",
+     "config":
+     {
+      "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+      "tasks.max": 1, 
+      "connection.url" : "http://elasticsearch:9200",
+      "topics" : "users-counts", 
+      "poll.interval.ms" : 1000 ,
+       "type.name":"log",
+       "topic.index.map":"logs:logs_index",
+       "key.ignore" : "true",
+       "schema.ignore": "true"
+    
+     } 
+    }
+    ```
+    
+    This request will send the data of topic `users-counts` directly to Elasticsearch, and will create an index with the topic name.
+
+4. To make sure connector created successfully, run: `curl -s -X GET http://localhost:8083/connectors/elk-connect/status`
+You must get success result:
+
+    ```
+    {"name":"elk-connect","connector":{"state":"RUNNING","worker_id":"localhost:8083"},"tasks":[{"state":"RUNNING","id":0,"worker_id":"localhost:8083"}],"type":"sink"}%
+    ```
+5. To check index created successfully, run: `curl -XGET 'http://localhost:9200/users-counts/_search?pretty'` (set the correct topic name, this is the stream output topic)
+you should get a similar result:
+
+    ```json
+    {
+      "took" : 7,
+      "timed_out" : false,
+      "_shards" : {
+        "total" : 5,
+        "successful" : 5,
+        "skipped" : 0,
+        "failed" : 0
+      },
+      "hits" : {
+        "total" : 198,
+        "max_score" : 1.0,
+        "hits" : [
+          {
+            "_index" : "users-counts",
+            "_type" : "log",
+            "_id" : "users-counts+0+144",
+            "_score" : 1.0,
+            "_source" : {
+              "windowStart" : 1545601538000,
+              "count" : 1,
+              "windowEnd" : 1545601539000,
+              "userName" : "user_3"
+            }
+          },
+          {
+            "_index" : "users-counts",
+            "_type" : "log",
+            "_id" : "users-counts+0+178",
+            "_score" : 1.0,
+            "_source" : {
+              "windowStart" : 1545601598000,
+              "count" : 1,
+              "windowEnd" : 1545601599000,
+              "userName" : "user_1"
+            }
+          }
+        ]
+      }
+    }
+    ``` 
+6. Everything is ready, you can go to Kibana: `http://localhost:5601/` and create your own visualization and dashboards.
+ 
